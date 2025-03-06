@@ -1,8 +1,8 @@
 mod ram_command;
 mod ram_stub;
-pub mod write_flash;
 pub mod reset;
 pub mod speed;
+pub mod write_flash;
 
 use console::Term;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -63,6 +63,11 @@ impl SifliTool {
             .unwrap();
         // Self::run(&port).unwrap();
         // std::thread::sleep(Duration::from_millis(500));
+        let buf: [u8; 14] = [
+            0x7E, 0x79, 0x08, 0x00, 0x10, 0x00, 0x41, 0x54, 0x53, 0x46, 0x33, 0x32, 0x18, 0x21,
+        ];
+        // Turn off the uart debug module again before transferring the data.
+        port.write_all(&buf).unwrap();
         port.write_all("\r\n".as_bytes()).unwrap();
         port.flush().unwrap();
         port.clear(serialport::ClearBuffer::All).unwrap();
