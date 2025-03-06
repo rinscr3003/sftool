@@ -1,6 +1,7 @@
 use sftool_lib::reset::Reset;
 use clap::{Parser, Subcommand, ValueEnum};
 use sftool_lib::write_flash::WriteFlashTrait;
+use sftool_lib::speed::SpeedTrait;
 use sftool_lib::{SifliTool, SifliToolBase, WriteFlashParams};
 use strum::{Display, EnumString};
 
@@ -98,6 +99,7 @@ fn main() {
             chip: args.chip.to_string().to_lowercase(),
             memory_type: args.memory.to_string().to_lowercase(),
             quiet: false,
+            baud: args.baud,
         },
         if let Some(Commands::WriteFlash(ref write_flash)) = args.command {
             Some(WriteFlashParams {
@@ -110,6 +112,11 @@ fn main() {
             None
         },
     );
+    
+    if args.baud != 1000000 {
+        siflitool.set_speed(args.baud).unwrap();
+    }
+    
     let res = match args.command {
         Some(Commands::WriteFlash(_)) => siflitool.write_flash(),
         None => Ok(()),

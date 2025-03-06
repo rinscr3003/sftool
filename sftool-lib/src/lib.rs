@@ -2,6 +2,7 @@ mod ram_command;
 mod ram_stub;
 pub mod write_flash;
 pub mod reset;
+pub mod speed;
 
 use console::Term;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -29,6 +30,7 @@ pub struct SifliToolBase {
     pub port_name: String,
     pub chip: String,
     pub memory_type: String,
+    pub baud: u32,
     pub quiet: bool,
 }
 
