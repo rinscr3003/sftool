@@ -100,7 +100,14 @@ impl RamCommand for SifliTool {
             
             // 一旦buffer出现RESPONSE_STR_TABLE中的任意一个，不一定是结束字节，也可能是在buffer中间出现，就认为接收完毕
             for response_str in RESPONSE_STR_TABLE.iter() {
-                let buffer_str = std::str::from_utf8(&buffer).unwrap();
+                let buffer_str = std::str::from_utf8(&buffer).ok();
+                let buffer_str = match buffer_str {
+                    Some(buffer_str) => buffer_str,
+                    None => {
+                        buffer.clear();
+                        continue;
+                    },
+                };
                 if buffer_str.contains(response_str) {
                     return Response::from_str(response_str).map_err(|e| {
                         std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string())
