@@ -275,10 +275,9 @@ impl WriteFlashTrait for SifliTool {
         for file in write_flash_files.iter() {
             let re_download_spinner = ProgressBar::new_spinner();
             let download_bar = ProgressBar::new(file.file.metadata()?.len());
-            let mut downloaded = 0;
 
             let download_bar_template = ProgressStyle::default_bar()
-                .template("[{prefix}] Download at {msg}... {wide_bar} {bytes}/{total_bytes}")
+                .template("[{prefix}] Download at {msg}... {wide_bar} {bytes_per_sec} {percent_precise}%")
                 .unwrap()
                 .progress_chars("=>-");
 
@@ -337,8 +336,8 @@ impl WriteFlashTrait for SifliTool {
                     let res = self.send_data(&buffer[..bytes_read])?;
                     if res == Response::RxWait {
                         if !self.base.quiet {
-                            download_bar.inc(downloaded as u64);
-                            downloaded += bytes_read;
+                            download_bar.inc(bytes_read as u64);
+                            // downloaded += bytes_read;
                         }
                         continue;
                     } else if res != Response::Ok {
@@ -385,8 +384,7 @@ impl WriteFlashTrait for SifliTool {
                         ));
                     }
                     if !self.base.quiet {
-                        download_bar.inc(downloaded as u64);
-                        downloaded += bytes_read;
+                        download_bar.inc(bytes_read as u64);
                     }
                 }
                 if !self.base.quiet {
