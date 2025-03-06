@@ -161,7 +161,7 @@ fn get_file_crc32(file: &File) -> Result<u32, std::io::Error> {
 
     let mut digest = CRC.digest();
 
-    let mut buffer = [0u8; 4 * 1024 * 1024];
+    let mut buffer = [0u8; 4 * 1024];
     loop {
         let n = reader.read(&mut buffer)?;
         if n == 0 {
