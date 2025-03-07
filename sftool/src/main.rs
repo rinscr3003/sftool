@@ -60,6 +60,11 @@ struct Cli {
     #[arg(long = "connect-attempts", default_value_t = 7)]
     connect_attempts: i8,
 
+    /// Enable compatibility mode
+    /// You should turn on this option if you get frequent Timeout errors or if the checksum fails after downloading.
+    #[arg(long = "compat")]
+    compat: bool,
+
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -100,6 +105,7 @@ fn main() {
             memory_type: args.memory.to_string().to_lowercase(),
             quiet: false,
             baud: args.baud,
+            compat: args.compat,
         },
         if let Some(Commands::WriteFlash(ref write_flash)) = args.command {
             Some(WriteFlashParams {

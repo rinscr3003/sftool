@@ -226,6 +226,8 @@ impl WriteFlashTrait for SifliTool {
                 "No write flash params",
             ))?;
         let mut write_flash_files: Vec<WriteFlashFile> = Vec::new();
+        
+        let packet_size = if self.base.compat { 256 } else { 128 * 1024 };
 
         for file in params.file_path.iter() {
             // file@address
@@ -324,8 +326,8 @@ impl WriteFlashTrait for SifliTool {
                         "Write flash failed",
                     ));
                 }
-
-                let mut buffer = [0u8; 128 * 1024];
+                
+                let mut buffer = vec![0u8; 128 * 1024];
                 let mut reader = BufReader::new(&file.file);
 
                 loop {
@@ -352,7 +354,7 @@ impl WriteFlashTrait for SifliTool {
                     download_bar.finish_with_message("Download success!");
                 }
             } else {
-                let mut buffer = [0u8; 128 * 1024];
+                let mut buffer = vec![0u8; packet_size];
                 let mut reader = BufReader::new(&file.file);
 
                 if !self.base.quiet {
@@ -361,7 +363,8 @@ impl WriteFlashTrait for SifliTool {
                     download_bar.set_prefix(format!("0x{:02X}", step));
                     step += 1;
                 }
-
+                
+                let mut address = file.address;
                 loop {
                     let bytes_read = reader.read(&mut buffer)?;
                     if bytes_read == 0 {
@@ -369,7 +372,7 @@ impl WriteFlashTrait for SifliTool {
                     }
                     self.port.write_all(
                         Command::Write {
-                            address: file.address,
+                            address: address,
                             len: bytes_read as u32,
                         }
                         .to_string()
@@ -383,6 +386,7 @@ impl WriteFlashTrait for SifliTool {
                             "Write flash failed",
                         ));
                     }
+                    address += bytes_read as u32;
                     if !self.base.quiet {
                         download_bar.inc(bytes_read as u64);
                     }

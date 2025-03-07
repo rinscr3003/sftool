@@ -90,9 +90,18 @@ impl RamCommand for SifliTool {
     }
 
     fn send_data(&mut self, data: &[u8]) -> Result<Response, Error> {
-        self.port.write_all(data)?;
-        self.port.flush()?;
-
+        if !self.base.compat {
+            self.port.write_all(data)?;
+            self.port.flush()?;
+        } else {
+            // 每次只发256字节
+            for chunk in data.chunks(256) {
+                self.port.write_all(chunk)?;
+                self.port.flush()?;
+                std::thread::sleep(std::time::Duration::from_millis(10));
+            }
+        }
+        
         let mut buffer = Vec::new();
         let now = std::time::SystemTime::now();
         loop {

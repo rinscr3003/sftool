@@ -31,6 +31,7 @@ pub struct SifliToolBase {
     pub chip: String,
     pub memory_type: String,
     pub baud: u32,
+    pub compat: bool,
     pub quiet: bool,
 }
 
@@ -50,13 +51,7 @@ pub struct SifliTool {
 
 impl SifliTool {
     pub fn new(base_param: SifliToolBase, write_flash_params: Option<WriteFlashParams>) -> Self {
-        Self::download_stub(
-            &base_param.port_name,
-            &base_param.chip,
-            &base_param.memory_type,
-            base_param.quiet,
-        )
-        .unwrap();
+        Self::download_stub(&base_param).unwrap();
         let mut port = serialport::new(&base_param.port_name, 1000000)
             .timeout(Duration::from_secs(5))
             .open()
@@ -142,14 +137,9 @@ impl SifliTool {
         Ok(())
     }
 
-    fn download_stub(
-        port_name: &str,
-        chip: &str,
-        memory_type: &str,
-        quiet: bool,
-    ) -> Result<(), std::io::Error> {
+    fn download_stub(base_param: &SifliToolBase) -> Result<(), std::io::Error> {
         let spinner = ProgressBar::new_spinner();
-        if !quiet {
+        if !base_param.quiet {
             spinner.enable_steady_tick(Duration::from_millis(100));
             spinner.set_style(ProgressStyle::with_template("[{prefix}] {spinner} {msg}").unwrap());
             spinner.set_prefix("0x00");
@@ -161,7 +151,7 @@ impl SifliTool {
 
         let index = probes.iter().enumerate().find_map(|(index, probe)| {
             probe.serial_number.as_ref().and_then(|s| {
-                if s.contains(port_name) {
+                if s.contains(base_param.port_name.clone().as_str()) {
                     Some(index)
                 } else {
                     None
@@ -179,7 +169,7 @@ impl SifliTool {
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
         let mut session = probe
-            .attach(chip, Permissions::default())
+            .attach(base_param.chip.clone(), Permissions::default())
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
         let mut core = session
             .core(0)
@@ -191,7 +181,7 @@ impl SifliTool {
         // Download the stub
         let stub = ram_stub::RamStubFile::get(
             CHIP_FILE_NAME
-                .get(format!("{}_{}", chip, memory_type).as_str())
+                .get(format!("{}_{}", base_param.chip, base_param.memory_type).as_str())
                 .expect("REASON"),
         );
         let Some(stub) = stub else {
@@ -201,10 +191,12 @@ impl SifliTool {
             ));
         };
 
+        let packet_size = if base_param.compat { 256 } else { 64 * 1024 };
+
         let mut addr = 0x2005_A000;
         let mut data = &stub.data[..];
         while !data.is_empty() {
-            let chunk = &data[..std::cmp::min(data.len(), 64 * 1024)];
+            let chunk = &data[..std::cmp::min(data.len(), packet_size)];
             core.write_8(addr, chunk)
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
             addr += chunk.len() as u64;
@@ -233,7 +225,7 @@ impl SifliTool {
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
         std::thread::sleep(Duration::from_millis(500));
 
-        if !quiet {
+        if !base_param.quiet {
             spinner.finish_with_message("Connected success!");
         }
         Ok(())
