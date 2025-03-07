@@ -56,6 +56,7 @@ sftool [选项] 命令 [命令选项]
 - `--before <OPERATION>`: 连接芯片前的操作 [no_reset, soft_reset] (默认: no_reset)
 - `--after <OPERATION>`: 工具完成后的操作 [no_reset, soft_reset] (默认: soft_reset)
 - `--connect-attempts <ATTEMPTS>`: 连接尝试次数，负数或0表示无限次 (默认: 7)
+- `--compat` : 兼容模式，如果经常出现超时错误或下载后校验失败，则应打开此选项。
 
 ### 写入闪存命令
 

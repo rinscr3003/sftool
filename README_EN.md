@@ -56,6 +56,7 @@ sftool [OPTIONS] COMMAND [COMMAND OPTIONS]
 - `--before <OPERATION>`: Operation before connecting to the chip [no_reset, soft_reset] (default: no_reset)
 - `--after <OPERATION>`: Operation after the tool completes [no_reset, soft_reset] (default: soft_reset)
 - `--connect-attempts <ATTEMPTS>`: Number of connection attempts, negative or 0 means infinite (default: 7)
+- `--compat` : Compatibility mode, should be turned on if timeout errors or verification failures occur frequently after downloading.
 
 ### Write Flash Command
 
