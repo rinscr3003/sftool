@@ -41,6 +41,16 @@ cargo build --release
 
 ## 使用方法
 
+### 配置串口
+
+为了使sftool将您的串口认作sf32的调试串口，您需要：
+
+方法1（尚不可用）: 修改您CH343的`production string`，使其包含`SiFli`字符串（大小写不敏感）。
+
+方法2: 设置一个`SIFLI_UART_DEBUG`环境变量，然后重启软件或电脑使其生效。
+
+Tip: 这些方法同样适用于[probe-rs](https://github.com/OpenSiFli/probe-rs/tree/dev)。
+
 ### 基本命令格式
 
 ```bash
@@ -61,7 +71,10 @@ sftool [选项] 命令 [命令选项]
 ### 写入闪存命令
 
 ```bash
+# Linux/Mac
 sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash [选项] <文件@地址>...
+# Windows
+sftool -c SF32LB52 -p COM9 write_flash [选项] <文件@地址>...
 ```
 
 #### 写入闪存选项
@@ -73,18 +86,28 @@ sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash [选项] <文件@地址>...
 
 ### 示例
 
+Linux/Mac:
+
 ```bash
 # 写入单个文件到闪存
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash app.bin@0x12020000
 
 # 写入多个文件到不同地址
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash bootloader.bin@0x1000 app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash bootloader.bin@0x12010000 app.bin@0x12020000 ftab.bin@0x12000000
 
 # 写入并验证
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash --verify app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash --verify app.bin@0x12020000
 
 # 写入前擦除所有闪存
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash -e app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash -e app.bin@0x12020000
+```
+
+Windows:
+
+```bash
+# 写入多个文件到不同地址
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash bootloader.bin@0x1000 app.bin@0x12010000 ftab.bin@0x12000000
+# 其它同上
 ```
 
 ## 库使用

@@ -41,6 +41,16 @@ cargo build --release
 
 ## Usage
 
+### Configuring the Serial Port  
+
+To have `sftool` recognize your serial port as the debug port for `sf32`, follow one of these methods:  
+
+Method 1 (Not yet available):  Modify the `production string` of your CH343 to include the keyword `SiFli` (case-insensitive).  
+
+Method 2:  Set the environment variable `SIFLI_UART_DEBUG`, then restart the software or your computer for the changes to take effect.  
+
+Tip: These methods also apply to [probe-rs](https://github.com/OpenSiFli/probe-rs/tree/dev).
+
 ### Basic Command Format
 
 ```bash
@@ -61,7 +71,10 @@ sftool [OPTIONS] COMMAND [COMMAND OPTIONS]
 ### Write Flash Command
 
 ```bash
+# Linux/Mac
 sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash [OPTIONS] <FILE@ADDRESS>...
+# Windows
+sftool -c SF32LB52 -p COM9 write_flash [选项] <文件@地址>...
 ```
 
 #### Write Flash Options
@@ -73,18 +86,28 @@ sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash [OPTIONS] <FILE@ADDRESS>...
 
 ### Examples
 
+Linux/Mac:
+
 ```bash
 # Write a single file to flash
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash app.bin@0x12020000
 
 # Write multiple files to different addresses
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash bootloader.bin@0x1000 app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash bootloader.bin@0x12010000 app.bin@0x12020000 ftab.bin@0x12000000
 
 # Write and verify
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash --verify app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash --verify app.bin@0x12020000
 
 # Erase all flash before writing
-sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash -e app.bin@0x10000
+sftool -c SF32LB52 -p /dev/ttyUSB0 write_flash -e app.bin@0x12020000
+```
+
+Windows:
+
+```bash
+# Write multiple files to different addresses
+sftool -c SF32LB52 -p COM7 write_flash bootloader.bin@0x1000 app.bin@0x12010000 ftab.bin@0x12000000
+# Other as above
 ```
 
 ## Library Usage
