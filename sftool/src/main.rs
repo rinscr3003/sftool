@@ -80,7 +80,7 @@ enum Commands {
 #[command(about = "Write a binary blob to flash")]
 struct WriteFlash {
     /// Verify just-written data on flash (mostly superfluous, data is read back during flashing)
-    #[arg(long = "verify")]
+    #[arg(long = "verify", default_value = "true")]
     verify: bool,
 
     /// Disable data compression during transfer

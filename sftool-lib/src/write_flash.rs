@@ -212,6 +212,28 @@ impl SifliTool {
         }
         Ok(())
     }
+
+    fn verify(&mut self, address: u32, len: u32, crc: u32, mut step: i32) -> Result<(), std::io::Error> {
+        let spinner = ProgressBar::new_spinner();
+        if !self.base.quiet {
+            spinner.enable_steady_tick(std::time::Duration::from_millis(100));
+            spinner.set_style(ProgressStyle::with_template("[{prefix}] {spinner} {msg}").unwrap());
+            spinner.set_prefix(format!("0x{:02X}", step));
+            spinner.set_message("Verifying data...");
+        }
+        let response = self.command(Command::Verify { address, len, crc })?;
+        if response != Response::Ok {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "Verify failed",
+            ));
+        }
+        if !self.base.quiet {
+            spinner.finish_with_message("Verify success!");
+        }
+        step += 1;
+        Ok(())
+    }
 }
 
 impl WriteFlashTrait for SifliTool {
@@ -226,7 +248,7 @@ impl WriteFlashTrait for SifliTool {
                 "No write flash params",
             ))?;
         let mut write_flash_files: Vec<WriteFlashFile> = Vec::new();
-        
+
         let packet_size = if self.base.compat { 256 } else { 128 * 1024 };
 
         for file in params.file_path.iter() {
@@ -326,7 +348,7 @@ impl WriteFlashTrait for SifliTool {
                         "Write flash failed",
                     ));
                 }
-                
+
                 let mut buffer = vec![0u8; 128 * 1024];
                 let mut reader = BufReader::new(&file.file);
 
@@ -363,7 +385,7 @@ impl WriteFlashTrait for SifliTool {
                     download_bar.set_prefix(format!("0x{:02X}", step));
                     step += 1;
                 }
-                
+
                 let mut address = file.address;
                 loop {
                     let bytes_read = reader.read(&mut buffer)?;
@@ -375,8 +397,8 @@ impl WriteFlashTrait for SifliTool {
                             address: address,
                             len: bytes_read as u32,
                         }
-                        .to_string()
-                        .as_bytes(),
+                            .to_string()
+                            .as_bytes(),
                     )?;
                     self.port.flush()?;
                     let res = self.send_data(&buffer[..bytes_read])?;
@@ -394,6 +416,10 @@ impl WriteFlashTrait for SifliTool {
                 if !self.base.quiet {
                     download_bar.finish_with_message("Download success!");
                 }
+            }
+            // verify
+            if params.verify {
+                self.verify(file.address, file.file.metadata()?.len() as u32, file.crc32, step)?;
             }
         }
         Ok(())
