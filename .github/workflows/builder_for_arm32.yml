@@ -1,0 +1,60 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Builder for ARM32
+
+# Controls when the workflow will run
+on: [workflow_dispatch]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [linux-armhf, linux-arm]
+        include:
+          - build: linux-armhf
+            os: ubuntu-latest
+            target: arm-unknown-linux-gnueabihf
+            cmd: cross
+          - build: linux-arm
+            os: ubuntu-latest
+            target: arm-unknown-linux-gnueabi
+            cmd: cross
+      fail-fast: false
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Prepare env
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+          profile: minimal
+          override: true
+
+      - name: Prepare cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build 
+        run: ${{ matrix.cmd }} build --release --target ${{ matrix.target }}
+
+      - name: Upload artifact (arm-unknown-linux-gnueabihf)
+        if: matrix.target == 'arm-unknown-linux-gnueabihf'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sftool-armhf-unknown-linux-gnueabihf
+          path: target/${{ matrix.target }}/release/sftool
+
+      - name: Upload artifact (arm-unknown-linux-gnueabi)
+        if: matrix.target == 'arm-unknown-linux-gnueabi'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sftool-armel-unknown-linux-gnueabi
+          path: target/${{ matrix.target }}/release/sftool
