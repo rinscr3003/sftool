@@ -5,18 +5,16 @@ pre-build = [
     "apt-get update && apt-get install -y pkg-config libudev-dev:$CROSS_DEB_ARCH"
 ]
 
-[target.arm-unknown-linux-gnueabihf]
-pre-build = [
-    "apt-get update && apt-get install -y pkg-config",
-    "wget https://raw.githubusercontent.com/cross-rs/wiki_assets/refs/heads/main/FAQ/Debian%20Repositories/install-deb.sh",
-    "chmod +x install_deb.sh",
-    "bash install_deb.sh $CROSS_DEB_ARCH libudev-dev"
-]
-
 [target.arm-unknown-linux-gnueabi]
 pre-build = [
-    "apt-get update && apt-get install -y pkg-config",
-    "wget https://raw.githubusercontent.com/cross-rs/wiki_assets/refs/heads/main/FAQ/Debian%20Repositories/install-deb.sh",
-    "chmod +x install_deb.sh",
-    "bash install_deb.sh $CROSS_DEB_ARCH libudev-dev"
+    "apt-get update && apt-get install -y pkg-config wget",
+    "apt-get update && apt-get install --assume-yes ",
+    "apt-get update && apt-get install -y pkg-config libudev-dev:$CROSS_DEB_ARCH"
+]
+
+[target.i686-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt-get update && apt-get install --assume-yes ",
+    "apt-get update && apt-get install -y pkg-config libudev-dev:$CROSS_DEB_ARCH"
 ]
