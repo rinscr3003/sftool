@@ -187,7 +187,7 @@ impl SifliTool {
     fn erase_all(
         &mut self,
         write_flash_files: &[WriteFlashFile],
-        mut step: i32,
+        step: &mut i32,
     ) -> Result<(), std::io::Error> {
         let spinner = ProgressBar::new_spinner();
         if !self.base.quiet {
@@ -195,7 +195,7 @@ impl SifliTool {
             spinner.set_style(ProgressStyle::with_template("[{prefix}] {spinner} {msg}").unwrap());
             spinner.set_prefix(format!("0x{:02X}", step));
             spinner.set_message("Erasing all flash regions...");
-            step += 1;
+            *step = step.wrapping_add(1);
         }
         let mut erase_address: Vec<u32> = Vec::new();
         for f in write_flash_files.iter() {
@@ -213,7 +213,7 @@ impl SifliTool {
         Ok(())
     }
 
-    fn verify(&mut self, address: u32, len: u32, crc: u32, mut step: i32) -> Result<(), std::io::Error> {
+    fn verify(&mut self, address: u32, len: u32, crc: u32, step: &mut i32) -> Result<(), std::io::Error> {
         let spinner = ProgressBar::new_spinner();
         if !self.base.quiet {
             spinner.enable_steady_tick(std::time::Duration::from_millis(100));
@@ -231,14 +231,14 @@ impl SifliTool {
         if !self.base.quiet {
             spinner.finish_with_message("Verify success!");
         }
-        step += 1;
+        *step = step.wrapping_add(1);
         Ok(())
     }
 }
 
 impl WriteFlashTrait for SifliTool {
     fn write_flash(&mut self) -> Result<(), std::io::Error> {
-        let mut step = 1;
+        let mut step = self.step;
         let params = self
             .write_flash_params
             .as_ref()
@@ -293,7 +293,7 @@ impl WriteFlashTrait for SifliTool {
         }
 
         if params.erase_all {
-            self.erase_all(&write_flash_files, step)?;
+            self.erase_all(&write_flash_files, &mut step)?;
         }
 
         for file in write_flash_files.iter() {
@@ -419,7 +419,7 @@ impl WriteFlashTrait for SifliTool {
             }
             // verify
             if params.verify {
-                self.verify(file.address, file.file.metadata()?.len() as u32, file.crc32, step)?;
+                self.verify(file.address, file.file.metadata()?.len() as u32, file.crc32, &mut step)?;
             }
         }
         Ok(())
