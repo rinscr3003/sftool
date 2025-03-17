@@ -20,6 +20,16 @@ install_packages() {
                 purge_list+=( "${pkg}" )
             fi
         done
+    elif grep -i debian /etc/os-release; then
+        apt-get update
+
+        for pkg in "${@}"; do
+            if ! dpkg -L "${pkg}" >/dev/null 2>/dev/null; then
+                apt-get install --assume-yes --no-install-recommends "${pkg}"
+
+                purge_list+=( "${pkg}" )
+            fi
+        done
     else
         set_centos_ulimit
         for pkg in "${@}"; do
@@ -35,6 +45,8 @@ install_packages() {
 purge_packages() {
     if (( ${#purge_list[@]} )); then
         if grep -i ubuntu /etc/os-release; then
+            apt-get purge --assume-yes --auto-remove "${purge_list[@]}"
+        elif grep -i debian /etc/os-release; then
             apt-get purge --assume-yes --auto-remove "${purge_list[@]}"
         else
             yum remove -y "${purge_list[@]}"
