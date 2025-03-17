@@ -293,7 +293,7 @@ impl SifliTool {
         std::thread::sleep(Duration::from_secs(1));
 
         if !base_param.quiet {
-            spinner.finish_with_message("Stub Download success!");
+            spinner.finish_with_message("Stub download success!");
         }
         Ok(step)
     }
