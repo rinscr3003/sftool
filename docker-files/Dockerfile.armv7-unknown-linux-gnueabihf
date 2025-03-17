@@ -2,13 +2,13 @@ FROM debian:bookworm as cross-base
 ENV DEBIAN_FRONTEND=noninteractive
 
 COPY docker-files/common.sh docker-files/lib.sh /
-RUN /bin/sh /common.sh
+RUN /bin/bash /common.sh
 
 COPY docker-files/cmake.sh /
-RUN /bin/sh /cmake.sh
+RUN /bin/bash /cmake.sh
 
 COPY docker-files/xargo.sh /
-RUN /bin/sh /xargo.sh
+RUN /bin/bash /xargo.sh
 
 FROM cross-base as build
 
@@ -23,13 +23,13 @@ RUN apt-get update && apt-get install --assume-yes --no-install-recommends \
 #     binutils-arm-linux-gnueabihf
 
 COPY docker-files/qemu.sh /
-RUN /bin/sh /qemu.sh arm softmmu
+RUN /bin/bash /qemu.sh arm softmmu
 
 COPY docker-files/dropbear.sh /
-RUN /bin/sh /dropbear.sh
+RUN /bin/bash /dropbear.sh
 
 COPY docker-files/linux-image.sh /
-RUN /bin/sh /linux-image.sh armv7
+RUN /bin/bash /linux-image.sh armv7
 
 COPY docker-files/linux-runner docker-files/base-runner.sh /
 COPY docker-files/toolchain.cmake /opt/toolchain.cmake
