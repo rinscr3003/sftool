@@ -17,10 +17,10 @@ RUN apt-get update && apt-get install --assume-yes --no-install-recommends \
     gfortran-arm-linux-gnueabihf \
     libc6-dev-armhf-cross
 
-COPY deny-debian-packages.sh /
-RUN TARGET_ARCH=armhf /deny-debian-packages.sh \
-    binutils \
-    binutils-arm-linux-gnueabihf
+# COPY deny-debian-packages.sh /
+# RUN TARGET_ARCH=armhf /deny-debian-packages.sh \
+#     binutils \
+#     binutils-arm-linux-gnueabihf
 
 COPY qemu.sh /
 RUN /qemu.sh arm softmmu

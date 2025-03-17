@@ -3,7 +3,7 @@
 name: Builder
 
 # Controls when the workflow will run
-on: [push, fork, workflow_dispatch]
+on: [workflow_dispatch]
 
 permissions:
   contents: write
