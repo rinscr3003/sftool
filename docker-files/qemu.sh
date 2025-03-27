@@ -205,7 +205,8 @@ main() {
         libglib2.0-dev \
         libpixman-1-dev \
         libselinux1-dev \
-        zlib1g-dev
+        zlib1g-dev \
+        libmount-dev
 
     # ubuntu no longer provides statically linked libmount
     if_ubuntu_ge 22.04 build_static_libmount
