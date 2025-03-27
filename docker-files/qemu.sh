@@ -205,11 +205,11 @@ main() {
         libglib2.0-dev \
         libpixman-1-dev \
         libselinux1-dev \
-        zlib1g-dev \
-        libmount-dev
+        zlib1g-dev
 
     # ubuntu no longer provides statically linked libmount
     if_ubuntu_ge 22.04 build_static_libmount
+    if_debian build_static_libmount
 
     # if we have python3.6+, we can install qemu 7.0.0, which needs ninja-build
     # ubuntu 16.04 only provides python3.5, so remove when we have a newer qemu.
