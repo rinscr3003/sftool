@@ -32,6 +32,8 @@ build_static_libmount () {
 
     if_ubuntu_ge 22.04 version_spec=2.37.2
     if_ubuntu_ge 22.04 version=2.37
+    if_debian version_spec=2.37.2
+    if_debian version=2.37
 
     local td
     td="$(mktemp -d)"
