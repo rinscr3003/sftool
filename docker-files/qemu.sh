@@ -32,8 +32,6 @@ build_static_libmount () {
 
     if_ubuntu_ge 22.04 version_spec=2.37.2
     if_ubuntu_ge 22.04 version=2.37
-    if_debian version_spec=2.37.2
-    if_debian version=2.37
 
     local td
     td="$(mktemp -d)"
@@ -195,7 +193,8 @@ main() {
         libglib2.0-dev \
         libpixman-1-dev \
         libselinux1-dev \
-        zlib1g-dev
+        zlib1g-dev \
+        libmount-dev libblkid-dev uuid-dev
 
     if_debian install_packages \
         g++ \
@@ -207,11 +206,11 @@ main() {
         libglib2.0-dev \
         libpixman-1-dev \
         libselinux1-dev \
-        zlib1g-dev
+        zlib1g-dev \
+        libmount-dev libblkid-dev uuid-dev
 
     # ubuntu no longer provides statically linked libmount
     if_ubuntu_ge 22.04 build_static_libmount
-    if_debian build_static_libmount
 
     # if we have python3.6+, we can install qemu 7.0.0, which needs ninja-build
     # ubuntu 16.04 only provides python3.5, so remove when we have a newer qemu.
@@ -219,6 +218,8 @@ main() {
     if [[ "${is_ge_python36}" == "1" ]]; then
         if_ubuntu version=7.0.0
         if_ubuntu install_packages ninja-build
+        if_debian version=7.0.0
+        if_debian install_packages ninja-build
     fi
 
     # if we have python3.8+, we can install qemu 8.2.2, which needs ninja-build,
